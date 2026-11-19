@@ -598,14 +598,15 @@ function deliveryFee(){return fulfill==="Delivery"?(ZONES[zone].fee||0):0}
 function deliveryQuote(){return fulfill==="Delivery"&&ZONES[zone].fee==null}
 function cartSubtotal(){return cart.reduce(function(s,i){return s+i.price*i.qty},0)}
 function cartTotal(){return cartSubtotal()+deliveryFee()}
-function itemDetail(i){
-var parts=[];
-parts.push("Toppings: "+(i.toppings.length?i.toppings.join(", "):"sin toppings"));
-parts.push("Jaleas: "+(i.jaleas.length?i.jaleas.join(", "):"sin jaleas"));
-if(i.fruit)parts.push("Fruta: "+i.fruit);
-if(i.note)parts.push("Nota: "+i.note);
-return parts.join(" · ");
+function itemDetailLines(i){
+var lines=[];
+lines.push("Toppings: "+(i.toppings.length?i.toppings.join(", "):"sin toppings"));
+lines.push("Jaleas: "+(i.jaleas.length?i.jaleas.join(", "):"sin jaleas"));
+if(i.fruit)lines.push("Fruta: "+i.fruit);
+if(i.note)lines.push("Nota: "+i.note);
+return lines;
 }
+function itemDetail(i){return itemDetailLines(i).join(" · ")}
 function renderCart(){
 var list=document.getElementById("cartList");
 if(!cart.length){
@@ -614,7 +615,7 @@ list.innerHTML='<p class="empty">Tu pedido está vacío. Toca “+ Pedir” en u
 list.innerHTML="";
 cart.forEach(function(i,idx){
 var d=document.createElement("div");d.className="cartItem";
-d.innerHTML='<div class="info"><b>'+i.qty+' × '+esc(i.name)+' — '+money(i.price*i.qty)+'</b><small>'+esc(itemDetail(i))+'</small></div>';
+d.innerHTML='<div class="info"><b>'+i.qty+' × '+esc(i.name)+' — '+money(i.price*i.qty)+'</b><small>'+itemDetailLines(i).map(function(l){return esc(l)}).join("<br/>")+'</small></div>';
 var rm=document.createElement("button");rm.className="rm";rm.textContent="✕";rm.setAttribute("aria-label","Quitar");
 rm.addEventListener("click",function(){cart.splice(idx,1);renderCart()});
 d.appendChild(rm);list.appendChild(d);
@@ -648,24 +649,33 @@ var name=document.getElementById("custName").value.trim();
 var extra=document.getElementById("custExtra").value.trim();
 var note=document.getElementById("custNote").value.trim();
 var lines=["🍓 *PEDIDO — ANIDONAS*"];
-if(name)lines.push("Cliente: "+name);
-lines.push("Modalidad: "+fulfill+(extra?" — "+extra:""));
-lines.push("Pago: "+(payMethod==="yape"?"Yape":"Efectivo"));
-if(fulfill==="Delivery")lines.push("Zona de delivery: "+ZONES[zone].label+(ZONES[zone].fee!=null?" ("+money(ZONES[zone].fee)+")":" (a cotizar)"));
-lines.push("------------------------");
-cart.forEach(function(i){
-lines.push("• "+i.qty+" × "+i.name+" — "+money(i.price*i.qty));
-lines.push("   "+itemDetail(i));
+lines.push("━━━━━━━━━━━━━━");
+if(name)lines.push("👤 Cliente: *"+name+"*");
+lines.push("Modalidad: *"+fulfill+"*");
+if(extra){
+if(fulfill==="Delivery")lines.push("📍 Dirección: "+extra);
+else if(fulfill==="En mesa")lines.push("🪑 Mesa: "+extra);
+else lines.push("📝 Referencia: "+extra);
+}
+lines.push("💳 Pago: *"+(payMethod==="yape"?"Yape":"Efectivo")+"*");
+if(fulfill==="Delivery")lines.push("🛵 Zona de delivery: "+ZONES[zone].label+(ZONES[zone].fee!=null?" ("+money(ZONES[zone].fee)+")":" (a cotizar)"));
+lines.push("━━━━━━━━━━━━━━");
+lines.push("*DETALLE DEL PEDIDO*");
+lines.push("━━━━━━━━━━━━━━");
+cart.forEach(function(i,idx){
+lines.push((idx+1)+". *"+i.qty+" × "+i.name+"* — "+money(i.price*i.qty));
+itemDetailLines(i).forEach(function(d){lines.push("    • "+d)});
+lines.push("");
 });
-lines.push("------------------------");
+lines.push("━━━━━━━━━━━━━━");
 lines.push("Subtotal: "+money(cartSubtotal()));
 if(fulfill==="Delivery"){
 if(deliveryQuote()){lines.push("Delivery ("+ZONES[zone].label+"): a cotizar")}
 else{lines.push("Delivery ("+ZONES[zone].label+"): "+money(deliveryFee()))}
 }
-lines.push("*TOTAL: "+money(cartTotal())+"*");
+lines.push("💰 *TOTAL: "+money(cartTotal())+"*");
 if(deliveryQuote())lines.push("Nota: el total no incluye el delivery; el costo para otras zonas se cotiza por WhatsApp.");
-if(note)lines.push("Nota: "+note);
+if(note)lines.push("📝 Nota general: "+note);
 var notice=document.getElementById("orderNotice");
 notice.className="notice ok";
 notice.textContent="✓ Pedido listo: se abre WhatsApp para enviarlo a ANIDONAS.";
