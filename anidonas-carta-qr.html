@@ -648,37 +648,35 @@ return;
 var name=document.getElementById("custName").value.trim();
 var extra=document.getElementById("custExtra").value.trim();
 var note=document.getElementById("custNote").value.trim();
-var modeEmoji=fulfill==="Delivery"?"🛵":(fulfill==="En mesa"?"🍽️":"🥡");
-var lines=["🍩 *PEDIDO — ANIDONAS* 🍩"];
+var lines=["*PEDIDO — ANIDONAS*"];
 lines.push("━━━━━━━━━━━━━━");
-lines.push("👤 *DATOS DEL CLIENTE*");
-if(name)lines.push("🙋 Nombre: *"+name+"*");
-lines.push(modeEmoji+" Modalidad: *"+fulfill+"*");
+lines.push("*DATOS DEL CLIENTE*");
+if(name)lines.push("Nombre: *"+name+"*");
+lines.push("Modalidad: *"+fulfill+"*");
 if(extra){
-if(fulfill==="Delivery")lines.push("📍 Dirección: "+extra);
-else if(fulfill==="En mesa")lines.push("🪑 Mesa: "+extra);
-else lines.push("📌 Referencia: "+extra);
+if(fulfill==="Delivery")lines.push("Dirección: "+extra);
+else if(fulfill==="En mesa")lines.push("Mesa: "+extra);
+else lines.push("Referencia: "+extra);
 }
-lines.push((payMethod==="yape"?"📱":"💵")+" Pago: *"+(payMethod==="yape"?"Yape":"Efectivo")+"*");
-if(fulfill==="Delivery")lines.push("🗺️ Zona: "+ZONES[zone].label+(ZONES[zone].fee!=null?" ("+money(ZONES[zone].fee)+")":" (a cotizar)"));
+lines.push("Pago: *"+(payMethod==="yape"?"Yape":"Efectivo")+"*");
+if(fulfill==="Delivery")lines.push("Zona: "+ZONES[zone].label+(ZONES[zone].fee!=null?" ("+money(ZONES[zone].fee)+")":" (a cotizar)"));
 lines.push("━━━━━━━━━━━━━━");
-lines.push("🧾 *DETALLE DEL PEDIDO*");
+lines.push("*DETALLE DEL PEDIDO*");
 cart.forEach(function(i,idx){
 lines.push("*"+(idx+1)+") "+i.qty+" × "+i.name+"* — "+money(i.price*i.qty));
 itemDetailLines(i).forEach(function(d){
-var em=d.indexOf("Toppings:")===0?"🍫":(d.indexOf("Jaleas:")===0?"🍯":(d.indexOf("Fruta:")===0?"🍓":"📝"));
-lines.push("   "+em+" "+d);
+lines.push("   "+d);
 });
 });
 lines.push("━━━━━━━━━━━━━━");
-lines.push("🧮 Subtotal: "+money(cartSubtotal()));
+lines.push("Subtotal: "+money(cartSubtotal()));
 if(fulfill==="Delivery"){
-if(deliveryQuote()){lines.push("🛵 Delivery ("+ZONES[zone].label+"): a cotizar")}
-else{lines.push("🛵 Delivery ("+ZONES[zone].label+"): "+money(deliveryFee()))}
+if(deliveryQuote()){lines.push("Delivery ("+ZONES[zone].label+"): a cotizar")}
+else{lines.push("Delivery ("+ZONES[zone].label+"): "+money(deliveryFee()))}
 }
-lines.push("💰 *TOTAL A PAGAR: "+money(cartTotal())+"*");
-if(deliveryQuote())lines.push("⚠️ Nota: el total no incluye el delivery; el costo para otras zonas se cotiza por WhatsApp.");
-if(note)lines.push("📝 Nota general: "+note);
+lines.push("*TOTAL A PAGAR: "+money(cartTotal())+"*");
+if(deliveryQuote())lines.push("Nota: el total no incluye el delivery; el costo para otras zonas se cotiza por WhatsApp.");
+if(note)lines.push("Nota general: "+note);
 var notice=document.getElementById("orderNotice");
 notice.className="notice ok";
 notice.textContent="✓ Pedido listo: se abre WhatsApp para enviarlo a ANIDONAS.";
